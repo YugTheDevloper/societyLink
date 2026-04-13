@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.yug.societylink.dto.LoginDTO;
 import org.yug.societylink.dto.ResidentDTO;
@@ -26,40 +27,24 @@ public class ResidentServiceImpl implements ResidentService{
     private ResidentRepository residentRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     // --- METHOD 1: REGISTER ---
     @Override
     public ResidentDTO registerResident(ResidentDTO residentDTO) {
-        // Business Logic: (Future) Check if email already exists?
-        // For now, just save to DB.
 
         Resident resident = modelMapper.map(residentDTO,Resident.class);
+        resident.setPassword(passwordEncoder.encode(resident.getPassword()));
+        resident.setRoles("RESIDENT");
         Resident savedResident=residentRepository.save(resident);
         return modelMapper.map(savedResident,ResidentDTO.class);
     }
 
-    // --- METHOD 2: LOGIN ---
-    @Override
-    public ResidentDTO loginResident(LoginDTO loginDTO) {
-        // 1. Find the user by Email (Using the custom method we made!)
-        Resident resident = residentRepository.findByEmail(loginDTO.getEmail()).orElseThrow(()->new UserNotFoundException("USER NOT FOUND WITH EMAIL:"+loginDTO.getEmail()));
 
 
-            // 2. Check Password
-            // Note: In real life, we use BCrypt for hashing, never plain text.
-            if (resident.getPassword().equals(loginDTO.getPassword())) {
-
-                //for now i manually created dto
-                return modelMapper.map(resident,ResidentDTO.class); // Success: Return the user
-            }else{
-                throw new BadCredentials("ENTER A VALID PASSWORD ");
-        }
-
-
-    }
-
-    // --- METHOD 3: GET ALL ---
+    // --- METHOD 2: GET ALL ---
     @Override
     public Page<ResidentDTO> getAllResidents(int pageNumber, int pageSize, String sortBy) {
 
@@ -73,9 +58,9 @@ public class ResidentServiceImpl implements ResidentService{
     }
 
     @Override
-    public ResidentDTO updateResident(Long id , UpdateDTO updateDTO){
+    public ResidentDTO updateResident(String email, UpdateDTO updateDTO){
 
-        Resident existingResident = residentRepository.findById(id).orElseThrow(()->new UserNotFoundException("USER NOT FOUND!"));
+        Resident existingResident = residentRepository.findByEmail(email).orElseThrow(()->new UserNotFoundException("USER NOT FOUND!"));
         if(updateDTO.getName()!=null && !updateDTO.getName().trim().isEmpty())
             existingResident.setName(updateDTO.getName());
 

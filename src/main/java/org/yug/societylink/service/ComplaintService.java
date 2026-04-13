@@ -29,9 +29,9 @@
         @Autowired
         private ModelMapper modelMapper;
 
-        public ComplaintResponseDTO saveComplaint(Long residentId, ComplaintRequestDTO complaintRequestDTO){
+        public ComplaintResponseDTO saveComplaint(String username, ComplaintRequestDTO complaintRequestDTO){
 
-            Resident resident=(residentRepository.findById(residentId)).orElseThrow(()-> new UserNotFoundException("NO RESIDENT IS REGISTERED WITH THIS "+ residentId));
+            Resident resident=(residentRepository.findByEmail(username)).orElseThrow(()-> new UserNotFoundException("NO RESIDENT IS REGISTERED WITH THIS "+ username));
 
             Complaint updatedComplaint = modelMapper.map(complaintRequestDTO,Complaint.class);
             updatedComplaint.setResident(resident);
@@ -42,14 +42,8 @@
             return complaintResponseDTO;
         }
 
-        public List<ComplaintResponseDTO> getComplaintByResidentId(Long id){
-
-            if(!residentRepository.existsById(id)){
-                throw new UserNotFoundException("USER WITH ID"+ id +"DOESN'T EXIST");
-
-            }
-
-            List<Complaint> entities = complaintRepository.findByResidentId(id);
+        public List<ComplaintResponseDTO> getComplaintByResidentEmail(String username){
+            List<Complaint> entities = complaintRepository.findByResidentEmail(username);
             return entities.stream()
                     .map(entity -> modelMapper.map(entity, ComplaintResponseDTO.class)).toList();
 

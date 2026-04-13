@@ -11,6 +11,5 @@ public interface ResidentService {
 
     public ResidentDTO registerResident(ResidentDTO residentDTO);
     public Page<ResidentDTO> getAllResidents(int pageNumber, int pageSize, String sortBy);
-    public ResidentDTO loginResident(LoginDTO loginDTO);
-    ResidentDTO updateResident(Long id , UpdateDTO updateDTO);
+    ResidentDTO updateResident(String email, UpdateDTO updateDTO);
 }

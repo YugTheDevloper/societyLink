@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface ComplaintRepository extends JpaRepository<Complaint,Long> {
 
-   List<Complaint> findByResidentId(Long resident_id);
+   List<Complaint> findByResidentEmail(String Email);
 
 }
